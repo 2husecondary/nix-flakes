@@ -1,21 +1,13 @@
 {
   config,
-  lib,
   pkgs,
-  agenix,
   path,
   ...
-}: {
+}:
+{
   security.pam.services.nginx.setEnvironment = false;
   systemd.services.nginx.serviceConfig = {
-    SupplementaryGroups = ["shadow"];
-  };
-  age.secrets."archive.htpasswd" = {
-    file = path + /secrets/htpasswd.age;
-    path = "/var/lib/secrets/archive.htpasswd";
-    mode = "0640";
-    owner = "nginx";
-    group = "nginx";
+    SupplementaryGroups = [ "shadow" ];
   };
   age.secrets."minecraft.htpaswd" = {
     file = path + /secrets/minecraft.age;
@@ -24,19 +16,24 @@
     owner = "nginx";
     group = "nginx";
   };
-
+  age.secrets."cloudflare-api_token" = {
+    file = path + /secrets/cloudflare-api_token.age;
+    mode = "0640";
+    owner = "acme";
+    group = "acme";
+  };
   security.acme = {
     acceptTerms = true;
     defaults = {
       email = "ashuramaru@tenjin-dk.com";
       dnsResolver = "1.1.1.1:53";
-      dnsProvider = "njalla";
-      credentialsFile = /var/lib/scerts/njalla-api;
+      dnsProvider = "cloudflare";
+      credentialsFile = "${config.age.secrets.cloudflare-api_token.path}";
     };
   };
   services.nginx = {
     enable = true;
-    additionalModules = [pkgs.nginxModules.pam];
+    additionalModules = [ pkgs.nginxModules.pam ];
 
     recommendedGzipSettings = true;
     recommendedOptimisation = true;
@@ -58,17 +55,24 @@
       add_header X-XSS-Protection "1; mode=block";
       proxy_cookie_path / "/; secure; HttpOnly; SameSite=strict";
     '';
-    virtualHosts."www.tenjin-dk.com" = {
-      serverName = "www.tenjin-dk.com";
-      forceSSL = true;
-      enableACME = true;
-      locations."/archive" = {
-        root = "/var/lib/backup";
-        basicAuthFile = config.age.secrets."archive.htpasswd".path;
-        extraConfig = ''
-          autoindex on;
-        '';
-      };
+    virtualHosts."_" = {
+      default = true;
+      listen = [
+        { addr = "80"; }
+        { addr = "[::]:80"; }
+        {
+          addr = "443";
+          ssl = true;
+        }
+        {
+          addr = "[::]:443";
+          ssl = true;
+        }
+      ];
+      extraConfig = ''
+        ssl_reject_handshake on;
+        return 444;
+      '';
     };
     virtualHosts."static.fumoposting.com" = {
       serverName = "static.fumoposting.com";
@@ -76,7 +80,7 @@
       enableACME = true;
       basicAuthFile = config.age.secrets."minecraft.htpaswd".path;
       locations."/" = {
-        root = "/var/lib/minecraft/static";
+        root = "/var/lib/www/minecraft/static";
         extraConfig = ''
           auth_basic off;
           autoindex on;

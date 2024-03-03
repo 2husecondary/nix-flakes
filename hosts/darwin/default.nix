@@ -2,33 +2,53 @@
   lib,
   inputs,
   self,
-  nixpkgs,
   path,
+  nixpkgs,
   darwin,
-  home-manager,
   nur,
-  hyprland,
+  home-manager,
   agenix,
-  flatpaks,
-  aagl,
-  spicetify-nix,
+  sops-nix,
   vscode-server,
-  meanvoid-overlay,
+  catppuccin,
+  flatpaks,
+  spicetify-nix,
+  nixcord,
+  nixvim,
+  aagl,
   ...
-}: let
+}:
+let
   systems = import (path + /hosts/mkSystemConfig.nix) {
-    inherit (nixpkgs) lib;
-    inherit inputs self nixpkgs darwin;
-    inherit home-manager path;
-    inherit nur hyprland agenix flatpaks aagl spicetify-nix vscode-server meanvoid-overlay;
+    ### ----------------FLAKE------------------- ###
+    inherit lib;
+    inherit inputs self path;
+    ### ----------------FLAKE------------------- ###
+
+    ### ----------------SYSTEM------------------- ###
+    inherit nixpkgs darwin nur;
+    inherit home-manager agenix sops-nix;
+    inherit vscode-server;
+    ### ----------------SYSTEM------------------- ###
+
+    ### ----------------MODULES & OVERLAYS------------------- ###
+    inherit catppuccin flatpaks;
+    inherit
+      spicetify-nix
+      nixcord
+      nixvim
+      aagl
+      ;
+    ### ----------------MODULES & OVERLAYS------------------- ###
   };
   inherit (systems) mkSystemConfig;
-in {
+in
+{
   unsigned-int8 = mkSystemConfig.darwin {
     hostName = "unsigned-int8";
     system = "aarch64-darwin";
     useHomeManager = true;
-    users = ["ashuramaru"];
-    modules = [];
+    users = [ "ashuramaru" ];
+    modules = [ ];
   };
 }

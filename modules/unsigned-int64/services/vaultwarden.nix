@@ -1,13 +1,10 @@
 {
-  lib,
   config,
   pkgs,
-  agenix,
   path,
   ...
-}: let
-  domain = "bitwarden.tenjin-dk.com";
-in {
+}:
+{
   age.secrets.vaultwarden-env = {
     file = path + /secrets/vaultwarden-env.age;
     path = "/var/lib/secrets/.env";
@@ -70,6 +67,12 @@ in {
     locations."/" = {
       proxyPass = "http://vaultwarden-default";
       proxyWebsockets = true;
+      extraConfig = ''
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+      '';
     };
     locations."/admin" = {
       basicAuthFile = config.age.secrets."vault.htpasswd".path;

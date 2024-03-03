@@ -1,125 +1,149 @@
 {
   lib,
   inputs,
-  nixpkgs,
-  nixpkgs-23_11,
-  darwin,
-  meanvoid-overlay,
-  nur,
-  agenix,
-  home-manager,
-  flatpaks,
-  aagl,
-  spicetify-nix,
-  hyprland,
   path,
+  nixpkgs,
+  darwin,
+  nur,
+  home-manager,
+  agenix,
+  sops-nix,
   vscode-server,
+  catppuccin,
+  flatpaks,
+  spicetify-nix,
+  nixcord,
+  nixvim,
+  aagl,
   ...
-}: let
+}:
+let
   homeManager = import ./homeManagerModules.nix {
-    inherit lib inputs nixpkgs nixpkgs-23_11 darwin nur;
-    inherit home-manager spicetify-nix flatpaks;
-    inherit path;
+    inherit lib inputs path;
+    inherit nixpkgs darwin nur;
+    inherit home-manager agenix sops-nix;
+    inherit
+      catppuccin
+      spicetify-nix
+      nixcord
+      nixvim
+      ;
   };
   inherit (homeManager) homeManagerModules;
-  cfg = {
-    nixpkgs.config = {
-      allowUnfree = lib.mkDefault true;
+  addUnstablePackages = final: _prev: {
+    unstable = import inputs.unstable {
+      inherit (final) system;
+      config = final.config;
     };
   };
-in {
+  add-24_05-packages = final: _prev: {
+    nixpkgs-24_05 = import inputs.nixpkgs-24_05 {
+      inherit (final) system;
+      config = final.config;
+    };
+  };
+  cfg = {
+    nixpkgs.config.allowUnfree = true;
+    nixpkgs.overlays = [
+      addUnstablePackages
+      add-24_05-packages
+    ];
+  };
+in
+{
   mkSystemConfig = {
-    linux = {
-      hostName,
-      system,
-      useHomeManager ? false,
-      useHyprland ? false,
-      useNur ? false,
-      useAagl ? false,
-      useFlatpak ? false,
-      useVscodeServer ? false,
-      useNvidiaVgpu ? false,
-      users ? [],
-      modules ? [],
-      ...
-    } @ args: let
-      hostname = hostName;
-      defaults =
-        [
-          {config = cfg;}
+    linux =
+      {
+        hostName,
+        system,
+        useHomeManager ? false,
+        useNur ? false,
+        useVscodeServer ? false,
+        #TODO: useNvidiaVgpu ? false,
+        useFlatpak ? false,
+        useAagl ? false,
+        users ? [ ],
+        modules ? [ ],
+        ...
+      }:
+      let
+        hostname = hostName;
+        defaults = [
+          { config = cfg; }
+          sops-nix.nixosModules.sops
           agenix.nixosModules.default
-        ]
-        ++ modules;
-      sharedModules = lib.flatten [
-        (lib.optional useHyprland hyprland.nixosModules.default)
-        (lib.optional useNur nur.nixosModules.nur)
-        (lib.optional useAagl aagl.nixosModules.default)
-        (lib.optionals useFlatpak [
-          flatpaks.nixosModules.default
-          {
-            config.services.flatpak = {
-              enable = lib.mkDefault true;
-              remotes = {
-                "flathub" = "https://dl.flathub.org/repo/flathub.flatpakrepo";
-                "flathub-beta" = "https://dl.flathub.org/beta-repo/flathub-beta.flatpakrepo";
+          catppuccin.nixosModules.catppuccin
+        ] ++ modules;
+        sharedModules = lib.flatten [
+          (lib.optionals useHomeManager (homeManagerModules.nixos hostname users system))
+          (lib.optional useNur nur.modules.nixos.default)
+          (lib.optionals useVscodeServer [
+            vscode-server.nixosModules.default
+            { config.services.vscode-server.enable = lib.mkDefault true; }
+          ])
+          (lib.optionals useFlatpak [
+            flatpaks.nixosModules.declarative-flatpak
+            {
+              config.services.flatpak = {
+                enable = lib.mkDefault true;
+                remotes = {
+                  "flathub" = "https://dl.flathub.org/repo/flathub.flatpakrepo";
+                  "flathub-beta" = "https://dl.flathub.org/beta-repo/flathub-beta.flatpakrepo";
+                };
               };
-            };
-          }
-        ])
-        (lib.optionals useVscodeServer [
-          vscode-server.nixosModules.default
-          {
-            config.services.vscode-server.enable = lib.mkDefault true;
-          }
-        ])
-        (lib.optionals useNvidiaVgpu [
-          meanvoid-overlay.nixosModules.kvmfr
-          meanvoid-overlay.nixosModules.nvidia-vGPU
-        ])
-        (lib.optionals useHomeManager (homeManagerModules.nixos hostName users))
-        defaults
-      ];
-    in
+            }
+          ])
+          (lib.optionals useAagl [
+            aagl.nixosModules.default
+            {
+              aagl.enableNixpkgsReleaseBranchCheck = false;
+            }
+          ])
+          defaults
+        ];
+      in
       lib.nixosSystem {
         inherit system;
         specialArgs = {
-          inherit inputs hostname users path;
+          inherit inputs system hostname;
+          inherit path users;
           host = {
             inherit hostName;
           };
+          nixpkgs.overlays = [ (lib.optional useNur nur.overlay) ];
         };
-        modules = [(path + "/hosts/${hostName}/configuration.nix")] ++ sharedModules;
+        modules = [ "${path}/hosts/linux/${hostName}/configuration.nix" ] ++ sharedModules;
       };
 
-    darwin = {
-      hostName,
-      system,
-      useHomeManager ? false,
-      users ? [],
-      modules ? [],
-      ...
-    } @ args: let
-      hostname = hostName;
-      defaults =
-        [
-          {config = cfg;}
-        ]
-        ++ modules;
-      sharedModules = lib.flatten [
-        (lib.optional useHomeManager (homeManagerModules.darwin hostName users))
-        defaults
-      ];
-    in
+    darwin =
+      {
+        hostName,
+        system,
+        useHomeManager ? false,
+        users ? [ ],
+        modules ? [ ],
+        ...
+      }:
+      let
+        hostname = hostName;
+        defaults = [ { config = cfg; } ] ++ modules;
+        sharedModules = lib.flatten [
+          (lib.optional useHomeManager (homeManagerModules.darwin hostname users system))
+          agenix.darwinModules.default
+          defaults
+        ];
+      in
       darwin.lib.darwinSystem {
         inherit system;
         specialArgs = {
-          inherit inputs hostname users path;
-          inherit darwin nixpkgs nixpkgs-23_11;
+          inherit inputs system hostname;
+          inherit path users;
+          inherit darwin nixpkgs;
           host = {
             inherit hostName;
           };
         };
-        modules = [(path + /hosts/darwin/${hostName}/configuration.nix)] ++ sharedModules;
+        modules = [ "${path}/hosts/darwin/${hostName}/configuration.nix" ] ++ sharedModules;
       };
   };
 }

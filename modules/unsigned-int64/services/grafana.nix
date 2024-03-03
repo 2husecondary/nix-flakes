@@ -1,11 +1,10 @@
 {
   config,
-  lib,
   pkgs,
-  agenix,
   path,
   ...
-}: {
+}:
+{
   age.secrets.grafana_pgsql = {
     file = path + /secrets/grafana_pgsql.age;
     path = "/var/lib/secrets/pgsql.pass";
@@ -13,7 +12,6 @@
     owner = "grafana";
     group = "grafana";
   };
-
   services.grafana = {
     enable = true;
     settings = {
@@ -21,11 +19,12 @@
         enable_gzip = true;
         enforce_domain = true;
         protocol = "http";
-        domain = "metrics.tenjin-dk.com";
+        domain = "metrics.tenjin.com";
         http_addr = "127.0.0.1";
         http_port = 2301;
-        root_url = "%(protocol)s://%(domain)s:%(http_port)s/grafana/";
         serve_from_sub_path = true;
+        # root_url = "%(protocol)s://%(domain)s:%(http_port)s/";
+        root_url = "https://metrics.tenjin.com/grafana/";
       };
       database = {
         type2 = "postgres";
@@ -51,14 +50,32 @@
         default_language = "en_us";
       };
     };
-    declarativePlugins = with pkgs.grafanaPlugins; [
-      grafana-piechart-panel
+    declarativePlugins = builtins.attrValues { inherit (pkgs.grafanaPlugins) grafana-piechart-panel; };
+  };
+  systemd.services.prometheus = {
+    after = [
+      "nginx.service"
+      "unbound.service"
+    ];
+    requires = [
+      "nginx.service"
+      "unbound.service"
+    ];
+  };
+  systemd.services.loki = {
+    after = [
+      "nginx.service"
+      "unbound.service"
+    ];
+    requires = [
+      "nginx.service"
+      "unbound.service"
     ];
   };
   services.prometheus = {
     enable = true;
-    listenAddress = "172.16.31.1";
-    webExternalUrl = "/";
+    listenAddress = "127.0.0.1";
+    webExternalUrl = "/prometheus";
     port = 9000;
     exporters = {
       node = {
@@ -78,25 +95,46 @@
         singleSubnetPerField = true;
         port = 9101;
       };
+      redis = {
+        enable = true;
+        port = 9102;
+      };
     };
     scrapeConfigs = [
       {
         job_name = "unsigned-int64";
-        static_configs = [{targets = ["127.0.0.1:${toString config.services.prometheus.exporters.node.port}"];}];
+        static_configs = [
+          { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.node.port}" ]; }
+        ];
       }
       {
         job_name = "wireguard";
-        static_configs = [{targets = ["127.0.0.1:${toString config.services.prometheus.exporters.wireguard.port}"];}];
+        static_configs = [
+          { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.wireguard.port}" ]; }
+        ];
+      }
+      {
+        job_name = "redis";
+        static_configs = [
+          { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.redis.port}" ]; }
+        ];
       }
       {
         job_name = "grafana";
         metrics_path = "/grafana/metrics";
-        static_configs = [{targets = ["127.0.0.1:${toString config.services.grafana.settings.server.http_port}"];}];
+        static_configs = [
+          { targets = [ "127.0.0.1:${toString config.services.grafana.settings.server.http_port}" ]; }
+        ];
       }
       {
         job_name = "prometheus";
         metrics_path = "/metrics";
-        static_configs = [{targets = ["172.16.31.1:${toString config.services.prometheus.port}"];}];
+        static_configs = [ { targets = [ "127.0.0.1:${toString config.services.prometheus.port}" ]; } ];
+      }
+      {
+        job_name = "ecoflow";
+        metrics_path = "/metrics";
+        static_configs = [ { targets = [ "172.16.31.1:9981" ]; } ];
       }
     ];
   };
@@ -120,18 +158,17 @@
         max_chunk_age = "1h";
         chunk_target_size = 999999;
         chunk_retain_period = "30s";
-        max_transfer_retries = 0;
       };
 
       schema_config = {
         configs = [
           {
-            from = "2022-06-06";
-            store = "boltdb-shipper";
+            from = "2023-12-31";
             object_store = "filesystem";
-            schema = "v11";
+            store = "tsdb";
+            schema = "v13";
             index = {
-              prefix = "index_";
+              prefix = "loki_ops_index_";
               period = "24h";
             };
           }
@@ -143,9 +180,11 @@
           active_index_directory = "/var/lib/loki/boltdb-shipper-active";
           cache_location = "/var/lib/loki/boltdb-shipper-cache";
           cache_ttl = "24h";
-          shared_store = "filesystem";
         };
-
+        tsdb_shipper = {
+          active_index_directory = "/var/lib/loki/tsdb-index";
+          cache_location = "/var/lib/loki/tsdb-cache";
+        };
         filesystem = {
           directory = "/var/lib/loki/chunks";
         };
@@ -156,10 +195,6 @@
         reject_old_samples_max_age = "168h";
       };
 
-      chunk_store_config = {
-        max_look_back_period = "0s";
-      };
-
       table_manager = {
         retention_deletes_enabled = false;
         retention_period = "0s";
@@ -167,7 +202,6 @@
 
       compactor = {
         working_directory = "/var/lib/loki";
-        shared_store = "filesystem";
         compactor_ring = {
           kvstore = {
             store = "inmemory";
@@ -195,7 +229,7 @@
         {
           job_name = "journal";
           journal = {
-            max_age = "12h";
+            max_age = "24h";
             labels = {
               job = "systemd-journal";
               host = "unsigned-int64";
@@ -203,7 +237,7 @@
           };
           relabel_configs = [
             {
-              source_labels = ["__journal__systemd_unit"];
+              source_labels = [ "__journal__systemd_unit" ];
               target_label = "unit";
             }
           ];
@@ -214,27 +248,25 @@
 
   services.nginx.virtualHosts = {
     "${config.services.grafana.settings.server.domain}" = {
-      enableACME = true;
-      forceSSL = true;
-      locations = {
-        "/grafana/" = {
-          proxyPass = "http://127.0.0.1:${toString config.services.grafana.settings.server.http_port}";
-          proxyWebsockets = true;
-        };
-        "/grafana/api/live/" = {
-          proxyPass = "http://127.0.0.1:${toString config.services.grafana.settings.server.http_port}";
-          proxyWebsockets = true;
-        };
-      };
-    };
-    "prom.tenjin.com" = {
       addSSL = true;
       sslCertificate = "/etc/ssl/self/tenjin.com/tenjin.com.crt";
       sslCertificateKey = "/etc/ssl/self/tenjin.com/tenjin.com.key";
       sslTrustedCertificate = "/etc/ssl/self/tenjin.com/ca.crt";
-      locations."/" = {
-        proxyPass = "http://172.16.31.1:${toString config.services.prometheus.port}";
-        proxyWebsockets = true;
+      locations = {
+        "/grafana/" = {
+          proxyPass = "http://${toString config.services.grafana.settings.server.http_addr}:${toString config.services.grafana.settings.server.http_port}";
+          proxyWebsockets = true;
+          recommendedProxySettings = true;
+        };
+        "/grafana/api/live/" = {
+          proxyPass = "http://${toString config.services.grafana.settings.server.http_addr}:${toString config.services.grafana.settings.server.http_port}";
+          proxyWebsockets = true;
+          recommendedProxySettings = true;
+        };
+        "/prometheus" = {
+          proxyPass = "http://127.0.0.1:${toString config.services.prometheus.port}";
+          proxyWebsockets = true;
+        };
       };
     };
   };

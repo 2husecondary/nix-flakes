@@ -1,21 +1,16 @@
+{ pkgs, ... }:
 {
-  lib,
-  config,
-  pkgs,
-  ...
-}: {
-  console = {
-    earlySetup = true;
-    keyMap = "us";
-    packages = with pkgs; [tamzen terminus_font];
-  };
-
-  sound = {
+  services.kmscon = {
     enable = true;
-    mediaKeys = {
-      enable = true;
-      volumeStep = "5%";
-    };
+    extraOptions = "--term xterm-256color";
+    extraConfig = "font-size=18";
+    hwRender = true;
+    fonts = [
+      {
+        name = "MesloLGL Nerd Font";
+        package = pkgs.nerdfonts.override { fonts = [ "Meslo" ]; };
+      }
+    ];
   };
 
   hardware.pulseaudio.enable = false;
@@ -34,46 +29,44 @@
     gvfs.enable = true;
   };
 
-  environment.systemPackages =
-    (with pkgs; [
+  environment.systemPackages = builtins.attrValues {
+    inherit (pkgs)
       # essential
-      curl
-      wget
-      nmap
-      dig
-
       zip
       unzip
       rar
       lz4
       p7zip
+      lm_sensors
 
       # utils
-      neofetch
-      hyfetch
+      binutils
+      findutils
+      util-linux
+      fio # disk benchmark
 
       ffmpeg_6-full
       imagemagick
       mpv
       mpd
+
       # Networking
       finger_bsd
-
-      util-linux
+      curl
+      wget
+      nmap
+      dig
 
       pciutils
       usbutils
       nvme-cli
-      libva-utils
 
-      fio
-      lm_sensors
-
+      # nvim clipboard
       xclip
       wl-clipboard
       wl-clipboard-x11
-    ])
-    ++ (with pkgs.gst_all_1; [
+      ;
+    inherit (pkgs.gst_all_1)
       gstreamer
       gst-vaapi
       gstreamermm
@@ -84,12 +77,17 @@
       gst-plugins-good
       gst-plugins-base
       gst-editing-services
-    ]);
+      ;
+  };
   programs = {
     neovim = {
       enable = true;
       viAlias = true;
       vimAlias = true;
+      defaultEditor = true;
+      withPython3 = true;
+      withNodeJs = true;
+      withRuby = true;
     };
     htop = {
       enable = true;
@@ -114,7 +112,10 @@
         };
         url = {
           "https://github.com/" = {
-            insteadOf = ["gh:" "github:"];
+            insteadOf = [
+              "gh:"
+              "github:"
+            ];
           };
         };
       };
@@ -124,6 +125,7 @@
       enableZshIntegration = true;
     };
   };
+  #TODO make false if theres no xserver
   security.rtkit.enable = true;
   programs.dconf.enable = true;
 }

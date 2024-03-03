@@ -1,34 +1,49 @@
+{ pkgs, ... }:
 {
-  config,
-  pkgs,
-  lib,
-  ...
-}: {
-  # make shares visible for windows 10 clients
   services = {
     samba-wsdd = {
       enable = true;
     };
     samba = {
       enable = true;
-      package = pkgs.sambaFull; #
+      package = pkgs.sambaFull;
       openFirewall = true;
-      enableWinbindd = true;
-      securityType = "user";
-      invalidUsers = ["root"];
-      extraConfig = ''
-        workgroup = WORKGROUP
-        server string = unsigned-int32
-        netbios name = unsigned-int32
-        security = user
-        hosts allow = 192.168.1.0/24 172.16.31.0/24 127.0.0.1 localhost ::1
-        hosts deny = 0.0.0.0/0
-        guest account = nobody
-        map to guest = bad user
-        load printers = yes
-        printing = cups
-      '';
-      shares = {
+      winbindd.enable = true;
+      settings = {
+        global = {
+          workgroup = "WORKGROUP";
+          "server string" = "unsigned-int32";
+          "netbios name" = "unsigned-int32";
+
+          "hosts deny" = "0.0.0.0/0";
+          "hosts allow" = [
+            "192.168.1.0/24"
+            "172.16.31.0/24"
+            "127.0.0.1"
+            "localhost"
+          ];
+
+          security = "user";
+          invalidUsers = [ "root" ];
+          "guest account" = "nobody";
+          "map to guest" = "bad user";
+
+          "load printers" = "yes";
+          "printing" = "cups";
+          "printcap name" = "cups";
+        };
+        printers = {
+          "comment" = "All Printers";
+          "path" = "/var/spool/samba";
+          "public" = "yes";
+          "browseable" = "yes";
+
+          # to allow user 'guest account' to print.
+          "guest ok" = "yes";
+          "writable" = "no";
+          "printable" = "yes";
+          "create mode" = 700;
+        };
         Public = {
           comment = "Public Directory";
           path = "/Shared";
@@ -46,6 +61,7 @@
           "force user" = "ashuramaru";
           "force group" = "users";
         };
+
         marie = {
           comment = "Marie's personal directory";
           path = "/Users/marie";
@@ -59,6 +75,7 @@
           "force user" = "ashuramaru";
           "force group" = "ashuramaru";
         };
+
         alex = {
           comment = "Alex's personal directory";
           path = "/Users/alex";
@@ -71,6 +88,7 @@
           "force user" = "meanrin";
           "force group" = "meanrin";
         };
+
         "Marie's public directory" = {
           path = "/Users/marie/Public";
           browseable = "yes";
@@ -105,10 +123,11 @@
           public = "no";
           writeable = "yes";
           "read only" = "no";
-          "create mask" = "0644";
-          "directory mask" = "0770";
+          "security mask" = "0775";
+          "create mask" = "0775";
+          "directory mask" = "0775";
           "valid users" = "ashuramaru meanrin";
-          "force user" = "root";
+          "force user" = "backup";
           "force group" = "users";
           "fruit:aapl" = "yes";
           "fruit:time machine" = "yes";
@@ -117,7 +136,13 @@
       };
     };
   };
-  systemd.tmpfiles.rules = [
-    "d /var/spool/samba 1777 root root -"
-  ];
+  users.users.backup = {
+    isSystemUser = true;
+    home = "/var/lib/backup";
+    initialHashedPassword = "";
+    extraGroups = [ "users" ];
+    group = "backup";
+  };
+  users.groups.backup = { };
+  systemd.tmpfiles.rules = [ "d /var/spool/samba 1777 root root -" ];
 }

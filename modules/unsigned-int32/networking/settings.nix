@@ -1,42 +1,51 @@
 {
   lib,
-  config,
   pkgs,
+  config,
+  hostname,
   path,
   ...
-}: let
+}:
+let
   private = config.age.secrets.wireguard-client.path;
   shared = config.age.secrets.wireguard-shared.path;
   auth-key = config.age.secrets.tailscale-auth-key.path;
-in {
+in
+{
   networking = {
-    hostName = "unsigned-int32";
+    hostName = "${hostname}";
     hostId = "ab5d64f5";
-    interfaces = {
-      "enp57s0" = {
-        name = "enp57s0";
-        useDHCP = true;
-      };
-      "enp59s0" = {
-        name = "enp59s0";
-        useDHCP = true;
-      };
-    };
+    # interfaces = {
+    #   "enp57s0" = {
+    #     name = "enp57s0";
+    #     useDHCP = true;
+    #   };
+    #   "enp59s0" = {
+    #     name = "enp59s0";
+    #     useDHCP = true;
+    #   };
+    # };
     nat = {
       enable = true;
       enableIPv6 = true;
       externalInterface = "enp59s0";
-      internalInterfaces = ["ve-+"];
+      internalInterfaces = [ "ve-+" ];
     };
     networkmanager = {
       enable = true;
-      unmanaged = ["interface-name:ve-*"];
+      unmanaged = [ "interface-name:ve-*" ];
     };
     firewall = {
       enable = true;
       allowPing = true;
-      allowedUDPPorts = [25565 15800];
-      allowedTCPPorts = [80 443];
+      allowedUDPPorts = [
+        25565
+        15800
+      ];
+      allowedTCPPorts = [
+        80
+        443
+      ];
     };
   };
   services.resolved.enable = true;
@@ -77,42 +86,22 @@ in {
       }
     ];
   };
-
-  age.secrets = {
-    wireguard-client.file = path + /secrets/wireguard-client.age;
-    wireguard-shared.file = path + /secrets/wireguard-shared.age;
-    tailscale-auth-key.file = path + /secrets/tailscale-auth-key.age;
-  };
+  age.secrets.tailscale-auth-key.file = path + /secrets/tailscale-auth-key.age;
   services.wg-netmanager.enable = true;
   networking.wireguard.enable = true;
-  networking.wg-quick.interfaces = {
-    wg-ui64 = {
-      address = ["172.16.31.3/32" "fd17:216b:31bc:1::3/128"];
-      privateKeyFile = private;
-      postUp = ''
-        ${pkgs.systemd}/bin/resolvectl dns wg-ui64 172.16.31.1
-        ${pkgs.systemd}/bin/resolvectl domain wg-ui64 ~tenjin.com ~internal.com ~\rcon.fumoposting.com
-      '';
-      peers = [
-        {
-          publicKey = "X6OBa2aMpoLGx9lYSa+p1U8OAx0iUxAE6Te9Mucu/HQ=";
-          presharedKeyFile = shared;
-          allowedIPs = [
-            "172.16.31.1/24"
-            "fd17:216b:31bc:1::1/128"
-          ];
-          endpoint = "www.tenjin-dk.com:51280";
-        }
-      ];
-    };
+  services.mullvad-vpn = {
+    enable = true;
+    package = pkgs.mullvad-vpn;
+    enableExcludeWrapper = false;
   };
+  services.v2raya.enable = true;
   services.tailscale = {
     enable = true;
     useRoutingFeatures = "both";
     openFirewall = true;
     authKeyFile = auth-key;
-    extraUpFlags = [
-      "--ssh"
-    ];
+    extraUpFlags = [ "--ssh" ];
   };
+  systemd.services.NetworkManager-wait-online.enable = lib.mkForce false;
+  systemd.services.systemd-networkd-wait-online.enable = lib.mkForce false;
 }
