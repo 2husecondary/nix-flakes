@@ -1,4 +1,0 @@
-[
-  ./users.nix
-  ./fonts.nix
-]
