@@ -16,10 +16,10 @@
         "ashuramaru"
         "fumono"
         "minecraft"
-        "nginx"
+        # "nginx"
       ];
     };
-    nginx.members = [ "minecraft" ];
+    # nginx.members = [ "minecraft" ];
     password = {
       gid = config.users.users.password.uid;
       members = [
@@ -34,7 +34,7 @@
       group = "password";
       extraGroups = [ "ashuramaru" ];
     };
-    nginx.extraGroups = [ "minecraft" ];
+    # nginx.extraGroups = [ "minecraft" ];
     root = {
       initialHashedPassword = "";
       openssh.authorizedKeys.keys = lib.flatten [
@@ -97,7 +97,7 @@
         "ashuramaru"
         "fumono"
         "docker"
-        "nginx"
+        # "nginx"
       ];
       openssh.authorizedKeys.keys = lib.flatten [
         config.users.users.ashuramaru.openssh.authorizedKeys.keys

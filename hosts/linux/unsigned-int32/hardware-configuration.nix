@@ -188,6 +188,7 @@
       "noatime"
       "autodefrag"
       "subvol=root"
+      "space_cache=v2"
       "compress-force=zstd:1"
     ];
   };
@@ -198,6 +199,7 @@
       "noatime"
       "autodefrag"
       "subvol=var"
+      "space_cache=v2"
       "compress-force=zstd:1"
     ];
     neededForBoot = true;
@@ -209,6 +211,7 @@
       "noatime"
       "autodefrag"
       "subvol=log"
+      "space_cache=v2"
       "compress-force=zstd:1"
     ];
     neededForBoot = true;
@@ -220,6 +223,7 @@
       "noatime"
       "subvol=nix"
       "autodefrag"
+      "space_cache=v2"
       "compress-force=zstd:1"
     ];
   };
@@ -230,6 +234,7 @@
       "noatime"
       "autodefrag"
       "subvol=persist"
+      "space_cache=v2"
       "compress-force=zstd:1"
     ];
   };
@@ -240,6 +245,7 @@
       "noatime"
       "autodefrag"
       "subvol=Users"
+      "space_cache=v2"
       "compress-force=zstd:1"
     ];
   };

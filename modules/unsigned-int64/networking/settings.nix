@@ -12,28 +12,20 @@
         };
         ipv4.addresses = [
           {
-            address = "116.202.39.70";
-            prefixLength = 25;
+            address = "188.34.136.192";
+            prefixLength = 26;
           }
         ];
         ipv6.addresses = [
           {
-            address = "2a01:4f8:2b01:300::";
+            address = "2a01:4f8:2191:246a::1";
             prefixLength = 64;
-          }
-          {
-            address = "2a01:4f8:2b01:300::1";
-            prefixLength = 128;
           }
         ];
       };
-      "eth1" = {
-        name = "eth1";
-        useDHCP = lib.mkForce false;
-      };
     };
     defaultGateway = {
-      address = "116.202.39.1";
+      address = "188.34.136.193";
       interface = "eth0";
     };
     defaultGateway6 = {
