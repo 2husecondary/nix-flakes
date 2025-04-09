@@ -69,7 +69,7 @@ in
         port = 2222;
         hostKeys =
           let
-            pathToSecrets = "/boot/secrets/sshd";
+            pathToSecrets = "/boot/crypt-storage/secrets/sshd";
           in
           [
             "${pathToSecrets}/ssh_host_ed25519"
