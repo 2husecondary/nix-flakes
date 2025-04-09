@@ -61,6 +61,7 @@ in
   };
   ### ----------------BOOT------------------- ###
   boot.initrd = {
+    systemd.users.root.shell = "/bin/cryptsetup-askpass";
     network = {
       enable = true;
       ssh = {
@@ -68,7 +69,7 @@ in
         port = 2222;
         hostKeys =
           let
-            pathToSecrets = "/root/secrets/sshd";
+            pathToSecrets = "/boot/secrets/sshd";
           in
           [
             "${pathToSecrets}/ssh_host_ed25519"
@@ -107,7 +108,8 @@ in
       "usb_storage"
       "uas"
       "sd_mod"
-      "igc" # No longer needed in initrd might get handy in a future, Intel 2.5gbe NIC
+      "igb"
+      # "igc" # No longer needed in initrd might get handy in a future, Intel 2.5gbe NIC
       # "ixgbe" # Intel 10gbe SFP+ NIC
     ];
     kernelModules = [
@@ -126,7 +128,7 @@ in
   };
   ### ---------------/dev/sda2-------------------- ###
   fileSystems."/" = {
-    device = "/dev/disk/by-uuid/2626953b02-1451-48a0-acdc-d02261ce95df";
+    device = "/dev/disk/by-uuid/26953b02-1451-48a0-acdc-d02261ce95df";
     fsType = "btrfs";
     options = [
       "noatime"
@@ -197,7 +199,7 @@ in
 
   ### ---------------/dev/md/nvmepool-------------------- ###
   fileSystems."/var/lib/nextcloud/data" = {
-    device = "/dev/md/nvmepool";
+    device = "/dev/mapper/nvmepool";
     fsType = "btrfs";
     options = [
       "noatime"

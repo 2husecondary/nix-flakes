@@ -5,14 +5,14 @@
     interfaces = {
       "eth0" = {
         name = "eth0";
-        useDHCP = lib.mkDefault true;
+        useDHCP = true;
         wakeOnLan = {
           enable = true;
           policy = [ "magic" ];
         };
         ipv4.addresses = [
           {
-            address = "188.34.136.192";
+            address = "188.34.136.238";
             prefixLength = 26;
           }
         ];
