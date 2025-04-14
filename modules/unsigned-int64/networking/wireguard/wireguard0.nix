@@ -35,15 +35,6 @@ in
           "fd17:216b:31bc:1::2/128"
         ];
       }
-      # root@unsigned-int32
-      {
-        publicKey = "XTC+Fd24xxuiYv2Ps1rdYXA3Z2WZqqWX+7obmCfd/XY=";
-        presharedKeyFile = preshared;
-        allowedIPs = [
-          "172.16.31.3/32"
-          "fd17:216b:31bc:1::3/128"
-        ];
-      }
       {
         # root@v1
         publicKey = "4WCatIaSouTOmlpVjHWsB3zZN6ikStYGyg6esqejhQo=";

@@ -10,7 +10,7 @@ _: {
       "$schema" = "https://starship.rs/config-schema.json";
       scan_timeout = 10;
       add_newline = false;
-      format = "[[\\[](bold red)$username[@](bold green)$hostname[\\]](bold red) $directory]($bold red)$nix_shell $character";
+      format = "[[\\[](bold red)$username[@](bold green)$hostname[\\]](bold red) $directory]($bold red)$nix_shell $character ";
       right_format = "$git_branch $git_status";
       character = {
         success_symbol = "[\\$](bold green)";
@@ -44,7 +44,7 @@ _: {
       };
       nix_shell = {
         format = " [via](bold green) [$symbol$state( \\($name\\))]($style)";
-        symbol = "❄️ ";
+        symbol = "❄️";
         style = "bold blue";
         impure_msg = " [impure shell](bold red)";
         pure_msg = "[pure shell](bold green)";

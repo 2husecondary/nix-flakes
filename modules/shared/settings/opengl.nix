@@ -9,16 +9,10 @@
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
-    extraPackages = builtins.filter (pkg: pkg != null) (
-      builtins.attrValues {
-        inherit (pkgs) libva vaapiVdpau libvdpau-va-gl;
-        nvidia-vaapi = if config.hardware.nvidia.modesetting.enable then pkgs.nvidia-vaapi-driver else null;
-        nv-codec-headers-12 = if config.hardware.nvidia.modesetting.enable then pkgs.nv-codec-headers-12 else null;
-      }
-    );
-    extraPackages32 = builtins.filter (pkg: pkg != null) (
-      builtins.attrValues { inherit (pkgs.driversi686Linux) libvdpau-va-gl; }
-    );
+    extraPackages = builtins.attrValues {
+      inherit (pkgs) libva vaapiVdpau libvdpau-va-gl;
+    };
+    extraPackages32 = builtins.attrValues { inherit (pkgs.driversi686Linux) libvdpau-va-gl; };
   };
   environment.sessionVariables = {
     EGL_PLATFORM = "wayland";

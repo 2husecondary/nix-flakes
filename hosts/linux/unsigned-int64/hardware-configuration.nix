@@ -1,5 +1,5 @@
 {
-  inputs,
+  # inputs,
   lib,
   config,
   pkgs,
@@ -67,15 +67,10 @@ in
       ssh = {
         enable = true;
         port = 2222;
-        hostKeys =
-          let
-            pathToSecrets = "/boot/crypt-storage/secrets/sshd";
-          in
-          [
-            "${pathToSecrets}/ssh_host_ed25519"
-            "${pathToSecrets}/ssh_host_ecdsa"
-            "${pathToSecrets}/ssh_host_rsa_key"
-          ];
+        hostKeys = [
+          "/boot/crypt-storage/sshd/ssh_host_ed25519"
+          "/boot/crypt-storage/sshd/ssh_host_rsa_key"
+        ];
         authorizedKeys = lib.flatten [
           config.users.users.ashuramaru.openssh.authorizedKeys.keys
           config.users.users.fumono.openssh.authorizedKeys.keys
@@ -215,6 +210,15 @@ in
 
   ### ---------------/dev/hddpool-------------------- ###
   fileSystems."/mnt/var/lib/backup" = {
+    device = "/dev/disk/by-uuid/09957dc9-4764-44cb-99b4-fed2ce553b27";
+    fsType = "ext4";
+    options = [
+      "nofail"
+      "noatime"
+      "data=ordered"
+    ];
+  };
+  fileSystems."/mnt/var/lib/transmission" = {
     device = "/dev/disk/by-uuid/09957dc9-4764-44cb-99b4-fed2ce553b27";
     fsType = "ext4";
     options = [

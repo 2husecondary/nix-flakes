@@ -10,10 +10,9 @@
     packages = [
       # Desktop
       "flathub:app/com.github.tchx84.Flatseal/x86_64/stable" # Easier permission manager
-      "flathub:app/io.github.arunsivaramanneo.GPUViewer/x86_64/stable" # For debugging purposes
       "flathub:app/com.usebottles.bottles/x86_64/stable"
 
-      # Vulkan utils
+      # `
       "flathub:runtime/org.freedesktop.Platform.VulkanLayer.MangoHud/x86_64/24.08"
       "flathub:runtime/org.freedesktop.Platform.VulkanLayer.gamescope/x86_64/24.08"
       "flathub:runtime/org.freedesktop.Platform.VulkanLayer.vkBasalt/x86_64/24.08"
@@ -31,10 +30,16 @@
           "xdg-config/gtk-4.0:ro"
         ];
       };
-      "com.usebottles.bottles".filesystems = [
-        "xdg-config/MangoHud:ro"
-        "xdg-data/games:rw"
-      ];
+      "com.usebottles.bottles" = {
+        sockets = [ "pcsc" ];
+        filesystems = [
+          "xdg-downloads:rw"
+          "xdg-pictures:rw"
+          "xdg-data/Steam:rw"
+          "xdg-data/games:rw"
+          "xdg-config/MangoHud:ro"
+        ];
+      };
     };
   };
 }

@@ -62,6 +62,7 @@
         ;
       # Social & Communication
       inherit (pkgs)
+        materialgram # tg client but better
         tdesktop # Telegram desktop
         dino # Jabber client
         signal-desktop # Signal desktop client
@@ -91,7 +92,6 @@
         # Misc
         xemu # Xbox emulator
         np2kai # PC-98 emulator
-        bottles # Play On Linux but modern
         flycast # Sega Dreamcast emulator
         prismlauncher # Minecraft launcher
 

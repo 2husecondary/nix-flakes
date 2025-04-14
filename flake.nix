@@ -77,6 +77,7 @@
     doom-emacs.inputs.nixpkgs.follows = "nixpkgs";
     doom-emacs.inputs.emacs-overlay.follows = "emacs-overlay";
     aagl.inputs.nixpkgs.follows = "unstable";
+    firefox-addons.inputs.nixpkgs.follows = "unstable";
     nixvim.inputs.nixpkgs.follows = "nixpkgs";
     ### --- de-duplication --- ###
   };

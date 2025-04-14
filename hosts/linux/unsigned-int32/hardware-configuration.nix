@@ -282,6 +282,16 @@
       "compress-force=zstd:9"
     ];
   };
+  fileSystems."/var/lib/backup/unsigned-int64" = {
+    device = "/dev/hddpool0/backup";
+    fsType = "btrfs";
+    options = [
+      "subvol=unsigned-int64"
+      "noatime"
+      "autodefrag"
+      "compress-force=zstd:9"
+    ];
+  };
   fileSystems."/var/lib/backup/shared" = {
     device = "/dev/hddpool0/backup";
     fsType = "btrfs";
@@ -323,8 +333,8 @@
     interval = "weekly";
     fileSystems = [
       "/"
+      "/var/lib/backup"
       # "/Shared/games"
-      # "/var/lib/backup"
     ];
   };
   services.fstrim = {
