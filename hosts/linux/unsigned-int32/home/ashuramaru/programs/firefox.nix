@@ -5,7 +5,6 @@
   ...
 }:
 let
-  isLinux = builtins.match ".*linux.*" pkgs.system != null;
   bypass-paywalls-clean =
     let
       version = "latest";
@@ -28,7 +27,7 @@ in
 {
   programs.floorp = {
     enable = true;
-    package = if isLinux then pkgs.floorp else pkgs.floorp-bin;
+    package = if pkgs.stdenv.isDarwin then pkgs.unstable.floorp else pkgs.floorp;
     profiles.default = {
       id = 0;
       name = "default";
@@ -114,214 +113,228 @@ in
         ];
         default = "Kagi";
         privateDefault = "Kagi";
-        engines = {
-          "Google".metaData.alias = "@g";
-          "Bing".metaData.hidden = true;
-          "You".metaData.hidden = true;
-          "You.com".metaData.hidden = true;
-          "Kagi" = {
-            urls = [
-              {
-                template = "https://kagi.com/search";
-                params = [
-                  {
-                    name = "q";
-                    value = "{searchTerms}";
-                  }
-                ];
-              }
-            ];
-            iconUpdateURL = "https://assets.kagi.com/v2/favicon-32x32.png";
-            updateInterval = 7 * 24 * 60 * 60 * 1000;
-            definedAliases = "@kagi";
+        engines =
+          let
+            update = 7 * 24 * 60 * 60 * 1000;
+          in
+          {
+            "Google".metaData.alias = "@g";
+            "Bing".metaData.hidden = true;
+            "You".metaData.hidden = true;
+            "You.com".metaData.hidden = true;
+            "Kagi" = {
+              urls = [
+                {
+                  template = "https://kagi.com/search";
+                  params = [
+                    {
+                      name = "q";
+                      value = "{searchTerms}";
+                    }
+                  ];
+                }
+                {
+                  template = "https://kagi.com/api/autosuggest";
+                  params = [
+                    {
+                      name = "q";
+                      value = "{searchTerms}";
+                    }
+                  ];
+                  type = "application/x-suggestions+json";
+                }
+              ];
+              iconUpdateURL = "https://assets.kagi.com/v2/favicon-32x32.png";
+              updateInterval = update;
+              definedAliases = [ "@kagi" ];
+            };
+            "DuckDuckGo" = {
+              urls = [
+                {
+                  template = "https://duckduckgo.com";
+                  params = [
+                    {
+                      name = "q";
+                      value = "{searchTerms}";
+                    }
+                  ];
+                }
+              ];
+              iconUpdateURL = "https://duckduckgo.com/favicon.ico";
+              updateInterval = update;
+              definedAliases = [ "@ddg" ];
+            };
+            "Home Manager" = {
+              urls = [
+                {
+                  template = "https://mipmip.github.io/home-manager-option-search";
+                  params = [
+                    {
+                      name = "query";
+                      value = "{searchTerms}";
+                    }
+                    {
+                      name = "release";
+                      value = "unstable";
+                    }
+                  ];
+                }
+              ];
+              icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+              definedAliases = [ "@hm" ];
+            };
+            "Nix Options" = {
+              urls = [
+                {
+                  template = "https://search.nixos.org/options";
+                  params = [
+                    {
+                      name = "type";
+                      value = "options";
+                    }
+                    {
+                      name = "query";
+                      value = "{searchTerms}";
+                    }
+                    {
+                      name = "channel";
+                      value = "unstable";
+                    }
+                  ];
+                }
+              ];
+              icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+              definedAliases = [ "@nq" ];
+            };
+            "Nix Packages" = {
+              urls = [
+                {
+                  template = "https://search.nixos.org/packages";
+                  params = [
+                    {
+                      name = "type";
+                      value = "packages";
+                    }
+                    {
+                      name = "query";
+                      value = "{searchTerms}";
+                    }
+                    {
+                      name = "channel";
+                      value = "unstable";
+                    }
+                  ];
+                }
+              ];
+              icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+              definedAliases = [ "@np" ];
+            };
+            "NixOS Wiki" = {
+              urls = [
+                {
+                  template = "https://nixos.wiki/index.php";
+                  params = [
+                    {
+                      name = "search";
+                      value = "{searchTerms}";
+                    }
+                  ];
+                }
+              ];
+              icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+              definedAliases = [ "@nw" ];
+            };
+            "GitHub" = {
+              urls = [
+                {
+                  template = "https://github.com/search";
+                  params = [
+                    {
+                      name = "q";
+                      value = "{searchTerms}";
+                    }
+                  ];
+                }
+              ];
+              iconUpdateURL = "https://github.com/favicon.ico";
+              updateInterval = update;
+              definedAliases = [ "@gh" ];
+            };
+            "SteamDB" = {
+              urls = [
+                {
+                  template = "https://steamdb.info/search";
+                  params = [
+                    {
+                      name = "a";
+                      value = "app";
+                    }
+                    {
+                      name = "q";
+                      value = "{searchTerms}";
+                    }
+                  ];
+                }
+              ];
+              iconUpdateURL = "https://steamdb.info/static/logos/512px.png";
+              updateInterval = update;
+              definedAliases = [ "@steamdb" ];
+            };
+            "ProtonDB" = {
+              urls = [
+                {
+                  template = "https://www.protondb.com/search";
+                  params = [
+                    {
+                      name = "q";
+                      value = "{searchTerms}";
+                    }
+                  ];
+                }
+              ];
+              iconUpdateURL = "https://www.protondb.com/sites/protondb/images/favicon.ico";
+              updateInterval = update;
+              definedAliases = [ "@protondb" ];
+            };
+            "YouTube" = {
+              urls = [
+                {
+                  template = "https://www.youtube.com/search";
+                  params = [
+                    {
+                      name = "q";
+                      value = "{searchTerms}";
+                    }
+                  ];
+                }
+              ];
+              iconUpdateURL = "https://www.youtube.com/s/desktop/5d5de6d9/img/favicon.ico";
+              updateInterval = update;
+              definedAliases = [
+                "@yt"
+                "@youtube"
+              ];
+            };
+            "YoutubeMusic" = {
+              urls = [
+                {
+                  template = "https://music.youtube.com/search";
+                  params = [
+                    {
+                      name = "q";
+                      value = "{searchTerms}";
+                    }
+                  ];
+                }
+              ];
+              iconUpdateURL = "https://www.youtube.com/s/desktop/5d5de6d9/img/favicon.ico";
+              updateInterval = update;
+              definedAliases = [
+                "@ytm"
+                "@ym"
+              ];
+            };
           };
-          "DuckDuckGo" = {
-            urls = [
-              {
-                template = "https://duckduckgo.com/";
-                params = [
-                  {
-                    name = "q";
-                    value = "{searchTerms}";
-                  }
-                ];
-              }
-            ];
-            iconUpdateURL = "https://duckduckgo.com/favicon.ico";
-            updateInterval = 7 * 24 * 60 * 60 * 1000;
-            definedAliases = [ "@ddg" ];
-          };
-          "Home Manager" = {
-            urls = [
-              {
-                template = "https://mipmip.github.io/home-manager-option-search/";
-                params = [
-                  {
-                    name = "query";
-                    value = "{searchTerms}";
-                  }
-                  {
-                    name = "release";
-                    value = "unstable";
-                  }
-                ];
-              }
-            ];
-            icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
-            definedAliases = [ "@hm" ];
-          };
-          "Nix Options" = {
-            urls = [
-              {
-                template = "https://search.nixos.org/options";
-                params = [
-                  {
-                    name = "type";
-                    value = "options";
-                  }
-                  {
-                    name = "query";
-                    value = "{searchTerms}";
-                  }
-                  {
-                    name = "channel";
-                    value = "unstable";
-                  }
-                ];
-              }
-            ];
-            icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
-            definedAliases = [ "@nq" ];
-          };
-          "Nix Packages" = {
-            urls = [
-              {
-                template = "https://search.nixos.org/packages";
-                params = [
-                  {
-                    name = "type";
-                    value = "packages";
-                  }
-                  {
-                    name = "query";
-                    value = "{searchTerms}";
-                  }
-                  {
-                    name = "channel";
-                    value = "unstable";
-                  }
-                ];
-              }
-            ];
-            icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
-            definedAliases = [ "@np" ];
-          };
-          "NixOS Wiki" = {
-            urls = [
-              {
-                template = "https://nixos.wiki/index.php";
-                params = [
-                  {
-                    name = "search";
-                    value = "{searchTerms}";
-                  }
-                ];
-              }
-            ];
-            icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
-            definedAliases = [ "@nw" ];
-          };
-          "GitHub" = {
-            urls = [
-              {
-                template = "https://github.com/search";
-                params = [
-                  {
-                    name = "q";
-                    value = "{searchTerms}";
-                  }
-                ];
-              }
-            ];
-            iconUpdateURL = "https://github.com/favicon.ico";
-            updateInterval = 24 * 60 * 60 * 1000;
-            definedAliases = [ "@gh" ];
-          };
-          "SteamDB" = {
-            urls = [
-              {
-                template = "https://steamdb.info/search";
-                params = [
-                  {
-                    name = "a";
-                    value = "app";
-                  }
-                  {
-                    name = "q";
-                    value = "{searchTerms}";
-                  }
-                ];
-              }
-            ];
-            iconUpdateURL = "https://steamdb.info/static/logos/512px.png";
-            updateInterval = 7 * 24 * 60 * 60 * 1000;
-            definedAliases = [ "@steamdb" ];
-          };
-          "ProtonDB" = {
-            urls = [
-              {
-                template = "https://www.protondb.com/search";
-                params = [
-                  {
-                    name = "q";
-                    value = "{searchTerms}";
-                  }
-                ];
-              }
-            ];
-            iconUpdateURL = "https://www.protondb.com/sites/protondb/images/favicon.ico";
-            updateInterval = 7 * 24 * 60 * 60 * 1000;
-            definedAliases = [ "@protondb" ];
-          };
-          "YouTube" = {
-            urls = [
-              {
-                template = "https://www.youtube.com/search";
-                params = [
-                  {
-                    name = "q";
-                    value = "{searchTerms}";
-                  }
-                ];
-              }
-            ];
-            iconUpdateURL = "https://www.youtube.com/s/desktop/5d5de6d9/img/favicon.ico";
-            updateInterval = 7 * 24 * 60 * 60 * 1000;
-            definedAliases = [
-              "@yt"
-              "@youtube"
-            ];
-          };
-          "YoutubeMusic" = {
-            urls = [
-              {
-                template = "https://music.youtube.com/search";
-                params = [
-                  {
-                    name = "q";
-                    value = "{searchTerms}";
-                  }
-                ];
-              }
-            ];
-            iconUpdateURL = "https://www.youtube.com/s/desktop/5d5de6d9/img/favicon.ico";
-            updateInterval = 7 * 24 * 60 * 60 * 1000;
-            definedAliases = [
-              "@ytm"
-              "@ym"
-            ];
-          };
-        };
       };
 
     };

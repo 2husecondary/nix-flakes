@@ -209,7 +209,7 @@ in
   ### ---------------/dev/md/nvmepool-------------------- ###
 
   ### ---------------/dev/hddpool-------------------- ###
-  fileSystems."/mnt/var/lib/backup" = {
+  fileSystems."/var/lib/backup" = {
     device = "/dev/disk/by-uuid/09957dc9-4764-44cb-99b4-fed2ce553b27";
     fsType = "ext4";
     options = [
@@ -218,8 +218,8 @@ in
       "data=ordered"
     ];
   };
-  fileSystems."/mnt/var/lib/transmission" = {
-    device = "/dev/disk/by-uuid/09957dc9-4764-44cb-99b4-fed2ce553b27";
+  fileSystems."/var/lib/transmission" = {
+    device = "/dev/disk/by-uuid/949251e4-d899-42ee-805f-b888db84d657";
     fsType = "ext4";
     options = [
       "nofail"

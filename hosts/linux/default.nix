@@ -82,7 +82,6 @@ in
     users = [
       "root"
       "minecraft"
-
       "ashuramaru"
       "fumono"
     ];

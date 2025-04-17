@@ -38,6 +38,7 @@
       host all       all     ::1/128        trust
     '';
   };
+
   services.postgresqlBackup = {
     enable = true;
     databases = [
@@ -45,5 +46,6 @@
       "vaultwarden"
       "grafana"
     ];
+    location = "/var/lib/backup/postgresql";
   };
 }

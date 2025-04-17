@@ -1,15 +1,23 @@
 [
-  ./ankisync.nix
-  ./cvat.nix
-  ./fail2ban.nix
-  ./grafana.nix
-  ./jellyfin.nix
-  ./misc.nix
-  ./msmtp.nix
-  ./nextcloud.nix
+  # Most important
   ./nginx.nix
+  ./grafana.nix
+
+  # utils
+  ./fail2ban.nix
+  ./msmtp.nix # email
+
+  # media
+  ./torrent.nix
+  ./jellyfin.nix
+  ./anki.nix
+
+  # db
   ./postgresql.nix
   ./redis.nix
-  ./torrent.nix
+
+  # Misc
   ./vaultwarden.nix
+  ./nextcloud.nix
+  ./cvat.nix
 ]

@@ -18,14 +18,14 @@
     enable = true;
     openPeerPorts = true;
     downloadDirPermissions = "775";
-    home = "/var/lib/transmission";
+    home = "/var/lib/transmission/public";
     settings = {
       utp-enabled = true; # to not forget
       watch-dir-enabled = true;
       watch-dir = "${config.services.transmission.home}/watch-dir";
       incomplete-dir-enabled = true;
       incomplete-dir = "${config.services.transmission.home}/incomplete";
-      download-dir = "${config.services.transmission.home}/public/Downloads";
+      download-dir = "${config.services.transmission.home}/Downloads";
       rpc-bind-address = "0.0.0.0";
       rpc-port = 18765;
       rpc-whitelist-enabled = true;
@@ -70,7 +70,6 @@
     ];
   };
   users.users.transmission = {
-    home = "/var/lib/transmission";
     homeMode = "0770";
     openssh.authorizedKeys.keys = lib.flatten [
       config.users.users.ashuramaru.openssh.authorizedKeys.keys
@@ -157,25 +156,25 @@
       "TRANSMISSION_WEB_UI" = "flood-for-transmission";
       "TRANSMISSION_RPC_PORT" = "9091";
       "TRANSMISSION_RPC_USERNAME" = "ashuramaru";
-      "TRANSMISSION_DOWNLOAD_DIR" = "/data/private/Downloads";
+      "TRANSMISSION_DOWNLOAD_DIR" = "/data/Downloads";
       "TRANSMISSION_INCOMPLETE_DIR_ENABLED" = "true";
-      "TRANSMISSION_INCOMPLETE_DIR" = "/data/private/incomplete";
+      "TRANSMISSION_INCOMPLETE_DIR" = "/data/incomplete";
 
       "TRANSMISSION_SPEED_LIMIT_UP_ENABLED" = "true";
-      "TRANSMISSION_SPEED_LIMIT_UP" = "25000";
+      "TRANSMISSION_SPEED_LIMIT_UP" = "5000";
       "TRANSMISSION_SPEED_LIMIT_DOWN_ENABLED" = "true";
-      "TRANSMISSION_SPEED_LIMIT_DOWN" = "100000";
-      "TRANSMISSION_ALT_SPEED_UP" = "50000";
-      "TRANSMISSION_ALT_SPEED_DOWN" = "250000";
+      "TRANSMISSION_SPEED_LIMIT_DOWN" = "5000";
+      "TRANSMISSION_ALT_SPEED_UP" = "5000";
+      "TRANSMISSION_ALT_SPEED_DOWN" = "5000";
 
       "TZ" = "Europe/Berlin";
       "PUID" = "70";
       "PGID" = "70";
     };
     volumes = [
-      "/var/lib/transmission/protonvpn:/etc/openvpn/custom"
-      "/var/lib/transmission:/data:rw"
-      "/var/lib/transmission/config:/config:rw"
+      "/var/lib/transmission/private:/data:rw"
+      "/var/lib/transmission/private/config:/config:rw"
+      "/var/lib/transmission/private/protonvpn:/etc/openvpn/custom"
     ];
     ports = [ "172.16.31.1:9091:9091/tcp" ];
     log-driver = "journald";
