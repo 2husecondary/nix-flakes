@@ -20,8 +20,8 @@
   };
 
   services.nginx.virtualHosts."ankisync.tenjin-dk.com" = {
-    enableACME = true;
     forceSSL = true;
+    enableACME = true;
     locations."/" = {
       proxyPass = "http://127.0.0.1:27701";
       proxyWebsockets = true;

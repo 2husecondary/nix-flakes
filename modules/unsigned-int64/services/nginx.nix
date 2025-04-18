@@ -75,27 +75,26 @@
         return 444;
       '';
     };
-    # virtualHosts."static.fumoposting.com" = {
-    #   serverName = "static.fumoposting.com";
-    #   forceSSL = true;
-    #   enableACME = true;
-    #   basicAuthFile = config.age.secrets."minecraft.htpaswd".path;
-    #   locations."/" = {
-    #     root = "/var/lib/www/minecraft/static";
-    #     extraConfig = ''
-    #       auth_basic off;
-    #       autoindex on;
-    #     '';
-    #   };
-    #   locations."/backup" = {
-    #     root = "/var/lib/minecraft";
-    #     extraConfig = ''autoindex on;'';
-    #   };
-    #   locations."/admin" = {
-    #     root = "/var/lib/minecraft";
-    #     extraConfig = ''autoindex on;'';
-    #   };
-    # };
+    virtualHosts."static.fumoposting.com" = {
+      serverName = "static.fumoposting.com";
+      forceSSL = true;
+      enableACME = true;
+      basicAuthFile = config.age.secrets."minecraft.htpaswd".path;
+      locations."/" = {
+        root = "/var/lib/www/minecraft/static";
+        extraConfig = ''
+          autoindex on;
+        '';
+      };
+      # locations."/backup" = {
+      #   root = "/var/lib/minecraft";
+      #   extraConfig = ''autoindex on;'';
+      # };
+      # locations."/admin" = {
+      #   root = "/var/lib/minecraft";
+      #   extraConfig = ''autoindex on;'';
+      # };
+    };
   };
   users.groups.minecraft = {
     gid = config.users.users.minecraft.uid;

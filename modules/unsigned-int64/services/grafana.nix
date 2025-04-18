@@ -248,7 +248,7 @@
 
   services.nginx.virtualHosts = {
     "${config.services.grafana.settings.server.domain}" = {
-      addSSL = true;
+      forceSSL = true;
       sslCertificate = "/etc/ssl/self/tenjin.com/tenjin.com.crt";
       sslCertificateKey = "/etc/ssl/self/tenjin.com/tenjin.com.key";
       sslTrustedCertificate = "/etc/ssl/self/tenjin.com/ca.crt";

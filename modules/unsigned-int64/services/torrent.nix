@@ -85,7 +85,7 @@
   };
   services.nginx.virtualHosts = {
     "public.tenjin.com" = {
-      addSSL = true;
+      forceSSL = true;
       sslCertificate = "/etc/ssl/self/tenjin.com/tenjin.com.crt";
       sslCertificateKey = "/etc/ssl/self/tenjin.com/tenjin.com.key";
       sslTrustedCertificate = "/etc/ssl/self/tenjin.com/ca.crt";
@@ -94,7 +94,7 @@
       };
     };
     "private.tenjin.com" = {
-      addSSL = true;
+      forceSSL = true;
       sslCertificate = "/etc/ssl/self/tenjin.com/tenjin.com.crt";
       sslCertificateKey = "/etc/ssl/self/tenjin.com/tenjin.com.key";
       sslTrustedCertificate = "/etc/ssl/self/tenjin.com/ca.crt";
@@ -102,8 +102,8 @@
         proxyPass = "http://172.16.31.1:9091";
       };
     };
-    "2" = {
-      addSSL = true;
+    "lib.tenjin.com" = {
+      forceSSL = true;
       sslCertificate = "/etc/ssl/self/tenjin.com/tenjin.com.crt";
       sslCertificateKey = "/etc/ssl/self/tenjin.com/tenjin.com.key";
       sslTrustedCertificate = "/etc/ssl/self/tenjin.com/ca.crt";
