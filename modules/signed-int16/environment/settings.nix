@@ -10,7 +10,7 @@
   };
   services.udev = {
     packages = builtins.attrValues {
-      inherit (pkgs) opentabletdriver gnome-settings-daemon;
+      inherit (pkgs) opentabletdriver gnome-settings-daemon openrgb-with-all-plugins;
       inherit (pkgs.gnome2) GConf;
     };
   };

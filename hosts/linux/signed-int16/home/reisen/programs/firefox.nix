@@ -15,7 +15,7 @@ let
       addonId = "magnolia@12.34";
       url = "https://gitflic.ru/project/magnolia1234/bpc_uploads/blob/raw?file=bypass_paywalls_clean-${version}.xpi";
       name = "bypass-paywall-clean-${version}";
-      sha256 = "sha256-ruRhCD01gLhZ/5iXbe6u3/xJ6yiAwpBIpOFR2HhAUTA=";
+      sha256 = "sha256-VIcHif8gA+11oL5AsADaHA6qfWT8+S0A8msaYE2ivns=";
       meta = {
         homepage = "https://twitter.com/Magnolia1234B";
         description = "Bypass Paywalls of (custom) news sites";
@@ -60,7 +60,6 @@ in
           foxyproxy-standard
           bitwarden
           firefox-translations
-          floccus
           tabliss
           old-reddit-redirect
           reddit-enhancement-suite
@@ -162,7 +161,7 @@ in
             ];
           };
         };
-        default = "SearXNG";
+        default = "Google";
       };
     };
   };

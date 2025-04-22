@@ -9,7 +9,7 @@
     overrides = {
       "sh.ppy.osu" = {
         filesystems = [
-          "/volumes/cursed/wiwi/osu-lazer"
+          "/mnt/wiwi/osu-lazer"
           "/home/reisen/Music"
         ];
       };
@@ -18,11 +18,7 @@
       # KDE/Qt
       "flathub:app/com.github.tchx84.Flatseal/x86_64/stable"
       "flathub:app/org.kde.kdenlive/x86_64/stable"
-
-      # Desktop
-      "flathub:app/com.github.Matoking.protontricks/x86_64/stable"
-      "flathub:app/io.github.arunsivaramanneo.GPUViewer/x86_64/stable"
-      "flathub:app/io.gitlab.theevilskeleton.Upscaler/x86_64/stable"
+      "flathub:app/org.kde.krita/x86_64/stable"
 
       # OBS
       "flathub:app/com.obsproject.Studio/x86_64/stable"

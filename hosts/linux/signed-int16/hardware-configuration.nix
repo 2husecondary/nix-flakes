@@ -44,33 +44,16 @@
   };
   ### ---------------boot drive-------------------- ###
   fileSystems."/" = {
-    device = "/dev/disk/by-uuid/fbd60dcd-5a5c-41e1-9fe1-46f86de28161";
-    fsType = "btrfs";
+    device = "/dev/disk/by-uuid/29bfb700-f152-42f9-ab82-7a3faa2d4cc5";
+    fsType = "ext4";
     options = [
-      "subvol=@"
       "noatime"
-      "compress-force=zstd:9"
-      "ssd"
-      "discard=async"
-      "space_cache=v2"
-    ];
-  };
-  fileSystems."/home" = {
-    device = "/dev/disk/by-uuid/fbd60dcd-5a5c-41e1-9fe1-46f86de28161";
-    fsType = "btrfs";
-    options = [
-      "subvol=@home"
-      "noatime"
-      "compress-force=zstd:9"
-      "ssd"
-      "discard=async"
-      "space_cache=v2"
     ];
   };
   ### ---------------boot drive-------------------- ###
 
   ### ---------------anything else-------------------- ###
-  fileSystems."/volumes/big" = {
+  fileSystems."/mnt/big" = {
     device = "/dev/disk/by-uuid/74248E2A248DF002";
     fsType = "ntfs-3g";
     options = [
@@ -78,7 +61,7 @@
       "uid=1000"
     ];
   };
-  fileSystems."/volumes/cursed/wiwi" = {
+  fileSystems."/mnt/wiwi" = {
     device = "/dev/disk/by-uuid/E4467BA4467B75E0";
     fsType = "ntfs-3g";
     options = [
@@ -87,13 +70,12 @@
     ];
   };
   ### ---------------anything else-------------------- ###
-  services.btrfs.autoScrub = {
+  services.fstrim = {
     enable = true;
-    interval = "monthly";
-    fileSystems = [ "/" ];
+    interval = "weekly";
   };
   system.fsPackages = [ pkgs.sshfs ];
-  environment.systemPackages = [ pkgs.cifs-utils ];
+  environment.systemPackages = [ pkgs.cifs-utils pkgs.btop pkgs.cdrtools ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 }

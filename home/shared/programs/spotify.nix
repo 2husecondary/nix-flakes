@@ -3,11 +3,10 @@
   programs.spicetify = {
     enable = true;
     colorScheme = "mocha";
-    spotifyPackage = pkgs.spotify.overrideAttrs (oldAttrs: {
-      installPhase =
-        oldAttrs.installPhase
-        + "wrapProgramShell $out/opt/Discord/Discord --add-flags \"--enable-wayland-ime --wayland-text-input-version=3\" ";
-    });
+#    spotifyPackage = pkgs.spotify.overrideAttrs (oldAttrs: {
+#      installPhase =
+#        oldAttrs.installPhase
+#        + "wrapProgramShell $out/opt/Discord/Discord --add-flags \"--enable-wayland-ime --wayland-text-input-version=3\" ";
     theme = pkgs.spicetify.themes.catppuccin;
 
     enabledExtensions = builtins.attrValues {

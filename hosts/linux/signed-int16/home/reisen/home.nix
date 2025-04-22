@@ -34,10 +34,8 @@
         librewolf
 
         # Graphics
-        krita
         gimp
         inkscape
-        kdenlive
 
         # Media
         quodlibet-full

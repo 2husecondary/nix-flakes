@@ -16,7 +16,6 @@ in
     interfaces = {
       "enp3s0" = {
         name = "enp3s0";
-        useDHCP = true;
       };
     };
     nat = {
@@ -44,7 +43,7 @@ in
     };
     listenAddresses = [
       {
-        addr = "192.168.1.70";
+        addr = "192.168.1.1";
         port = 22;
       }
     ];
