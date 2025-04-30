@@ -3,6 +3,7 @@
   services.hardware.openrgb = {
     enable = true;
     motherboard = "intel";
+    package = pkgs.openrgb-with-all-plugins;
   };
   hardware.opentabletdriver = {
     enable = true;
@@ -10,7 +11,7 @@
   };
   services.udev = {
     packages = builtins.attrValues {
-      inherit (pkgs) opentabletdriver gnome-settings-daemon openrgb-with-all-plugins;
+      inherit (pkgs) opentabletdriver gnome-settings-daemon;
       inherit (pkgs.gnome2) GConf;
     };
   };

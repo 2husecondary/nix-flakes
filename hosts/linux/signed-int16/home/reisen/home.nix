@@ -44,6 +44,9 @@
         brasero
         cdrtools
 
+        # gameing
+        prismlauncher
+
         # Dev
         lazygit
 
